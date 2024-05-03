@@ -4,9 +4,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
 
 # MongoDB Connection
 client = MongoClient('mongodb://localhost:27017/')
@@ -52,11 +49,13 @@ labels = df[sports]
 X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, random_state=42)
 
 # RandomForest Model
-model = RandomForestClassifier(n_estimators=50, max_depth=10, min_samples_leaf=2, random_state=42)
+model = RandomForestClassifier(n_estimators=50, max_depth=15, min_samples_leaf=1, random_state=42)
 model.fit(X_train, y_train)
+
 # Prepare New Data
-new_data = pd.DataFrame({
-    'gender': ['남자'],
+new_data_1 = pd.DataFrame({
+    'timestamp': ['2024. 5. 2 오후 12:06:02'],
+    'gender': ['여자'],
     'age': ['20대'],
     'environment': ['실내'],
     'frequency': ['주 1-2일'],
@@ -64,58 +63,107 @@ new_data = pd.DataFrame({
     'time_preference': ['주말'],
     'interests': ["승마, 실내서바이벌, 산악자전거, 아이스링크"]
 })
+
+# 레이블 인코딩 적용
 for column in ['gender', 'age', 'environment', 'frequency', 'budget', 'time_preference']:
-    new_data[column] = label_encoders[column].transform(new_data[column])
+    new_data_1[column] = label_encoders[column].transform(new_data_1[column])
 
 for sport in sports:
-    new_data[sport] = new_data['interests'].apply(lambda x: 1 if sport in x else 0)
-new_features = new_data[['gender', 'age', 'environment', 'frequency', 'budget', 'time_preference'] + sports]
+    new_data_1[sport] = new_data_1['interests'].apply(lambda x: 1 if sport in x else 0)
 
-# Predict New Data with Probability
-prob_predictions = model.predict_proba(new_features)
-prob_threshold = 0.3  # 예측 확률 임계값 설정
-predicted_sports = []
+new_features_1 = new_data_1[['gender', 'age', 'environment', 'frequency', 'budget', 'time_preference'] + sports]
 
-print("Prob_predictions 구조:", [p.shape for p in prob_predictions])
+# Predict New Data 1 with Probability
+prob_predictions_1 = model.predict_proba(new_features_1)
+predicted_sports_1 = []
 
-# 각 스포츠별 확률 정보 출력
 for i, sport in enumerate(sports):
-    print(f"{sport} 예측 확률: {prob_predictions[i]}")
+    # 확률 배열에서 '선호함' 클래스의 확률을 추출
+    if prob_predictions_1[i].shape[1] == 1:
+        sport_prob = prob_predictions_1[i][0][0] if prob_predictions_1[i][0][0] > 0.5 else 0
+    else:
+        sport_prob = prob_predictions_1[i][0][1]
 
-# 정확도 계산
+    if sport_prob >= 0.3:  # 확률 임계값 설정
+        predicted_sports_1.append(sport)
+
+print("새로운 데이터 1에 대한 선호 스포츠 예측: ", predicted_sports_1)
+
+# 추가할 새로운 데이터 2
+new_data_2 = pd.DataFrame({
+    'timestamp': ['2024. 5. 2 오전 11:41:45'],
+    'gender': ['여자'],
+    'age': ['30대'],
+    'environment': ['실외'],
+    'frequency': ['주 1-2일'],
+    'budget': ['100000원 미만'],
+    'time_preference': ['주말'],
+    'interests': ["승마, 패러글라이딩, 스쿠버다이빙, 스쿼시,사격,실내서바이벌,트릭킹,폴댄스"]
+})
+
+# 레이블 인코딩 적용
+for column in ['gender', 'age', 'environment', 'frequency', 'budget', 'time_preference']:
+    new_data_2[column] = label_encoders[column].transform(new_data_2[column])
+
+for sport in sports:
+    new_data_2[sport] = new_data_2['interests'].apply(lambda x: 1 if sport in x else 0)
+
+new_features_2 = new_data_2[['gender', 'age', 'environment', 'frequency', 'budget', 'time_preference'] + sports]
+
+# Predict New Data 2 with Probability
+prob_predictions_2 = model.predict_proba(new_features_2)
+predicted_sports_2 = []
+
+for i, sport in enumerate(sports):
+    # 확률 배열에서 '선호함' 클래스의 확률을 추출
+    if prob_predictions_2[i].shape[1] == 1:
+        sport_prob = prob_predictions_2[i][0][0] if prob_predictions_2[i][0][0] > 0.5 else 0
+    else:
+        sport_prob = prob_predictions_2[i][0][1]
+
+    if sport_prob >= 0.3:  # 확률 임계값 설정
+        predicted_sports_2.append(sport)
+
+print("새로운 데이터 2에 대한 선호 스포츠 예측: ", predicted_sports_2)
+
+# 추가할 새로운 데이터 3
+new_data_3 = pd.DataFrame({
+    'timestamp': ['2024. 5. 2 오후 02:30:00'],
+    'gender': ['여자'],
+    'age': ['30대'],
+    'environment': ['실외'],
+    'frequency': ['주 1-2일'],
+    'budget': ['100000원 미만'],
+    'time_preference': ['주말'],
+    'interests': ["서핑, 카누, 카약"]
+})
+
+# 레이블 인코딩 적용
+for column in ['gender', 'age', 'environment', 'frequency', 'budget', 'time_preference']:
+    new_data_3[column] = label_encoders[column].transform(new_data_3[column])
+
+for sport in sports:
+    new_data_3[sport] = new_data_3['interests'].apply(lambda x: 1 if sport in x else 0)
+
+new_features_3 = new_data_3[['gender', 'age', 'environment', 'frequency', 'budget', 'time_preference'] + sports]
+
+# Predict New Data 3 with Probability
+prob_predictions_3 = model.predict_proba(new_features_3)
+predicted_sports_3 = []
+
+for i, sport in enumerate(sports):
+    # 확률 배열에서 '선호함' 클래스의 확률을 추출
+    if prob_predictions_3[i].shape[1] == 1:
+        sport_prob = prob_predictions_3[i][0][0] if prob_predictions_3[i][0][0] > 0.5 else 0
+    else:
+        sport_prob = prob_predictions_3[i][0][1]
+
+    if sport_prob >= 0.3:  # 확률 임계값 설정
+        predicted_sports_3.append(sport)
+
+print("새로운 데이터 3에 대한 선호 스포츠 예측: ", predicted_sports_3)
+
+# 테스트 데이터를 사용하여 모델 평가
 predictions = model.predict(X_test)
 accuracy = accuracy_score(y_test, predictions)
-print("정확도:", accuracy)
-
-for i, sport in enumerate(sports):
-    # 확률 배열에서 '선호함' 클래스의 확률을 추출합니다.
-    # 비치 발리볼 같이 예외적으로 확률 배열이 하나만 있는 경우를 처리
-    if prob_predictions[i].shape[1] == 1:  # 클래스 확률이 하나만 존재하는 경우
-        sport_prob = prob_predictions[i][0][0] if prob_predictions[i][0][0] > 0.5 else 0  # 임계값보다 큰 경우에만 선호한다고 간주
-    else:
-        sport_prob = prob_predictions[i][0][1]  # 정상적으로 두 클래스의 확률이 있는 경우
-
-    if sport_prob >= prob_threshold:
-        predicted_sports.append(sport)
-
-print("확률 임계값에 기반한 선호 스포츠 예측: ", predicted_sports)
-
-from sklearn.metrics import classification_report
-
-# Decision Tree and k-NN Models
-decision_tree_model = DecisionTreeClassifier(random_state=42)
-knn_model = KNeighborsClassifier()
-
-# Training Decision Tree
-decision_tree_model.fit(X_train, y_train)
-dt_predictions = decision_tree_model.predict(X_test)
-dt_accuracy = accuracy_score(y_test, dt_predictions)
-print("Decision Tree Accuracy:", dt_accuracy)
-print(classification_report(y_test, dt_predictions, target_names=sports))
-
-# Training k-NN
-knn_model.fit(X_train, y_train)
-knn_predictions = knn_model.predict(X_test)
-knn_accuracy = accuracy_score(y_test, knn_predictions)
-print("k-NN Accuracy:", knn_accuracy)
-print(classification_report(y_test, knn_predictions, target_names=sports))
+print("테스트 정확도:", accuracy)
