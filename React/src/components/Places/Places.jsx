@@ -1,52 +1,36 @@
-import React, {useState} from "react";
-import data from "../../constants/data";
-// import images from "../../constants/images";
-import "./Places.css";
-// import {FaTimesCircle} from "react-icons/fa";
-import { Link , useNavigate} from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { fetchSports } from '../../service/sportService';
+import Grid from '@mui/material/Grid';
+import images from '../../constants/images';  
+import './Places.css'
 
-const Work = () => {
+const Places = () => {
+    const [sports, setSports] = useState([]);
 
-    const [imageModal, setImageModal] = useState(false);
-    const [imageSrc, setImageSrc] = useState("");
-
-    const setImageOnModal = (src) => {
-        setImageSrc(src);
-        setImageModal(true);
-    }
-    const navigate = useNavigate(); // useNavigate 훅 추가
-
+    useEffect(() => {
+      const loadSports = async () => {
+        try {
+          const sportsData = await fetchSports();
+          console.log(sportsData);
+          setSports(sportsData);
+        } catch (error) {
+          console.error('Failed to load sports:', error);
+        }
+      };
+  
+      loadSports();
+    }, []);
+  
     return (
-        <div className="work">
-            {/* <div className={imageModal ? "image__modal image__modal__show" : "image__modal"}>
-                <div className="image__modal--content">
-                    <FaTimesCircle className="modal__close--btn text__light bg__blue" size = {30} onClick = {() => setImageModal(false)} />
-                    <img src = {imageSrc} alt = "" />
-                </div>
-            </div> */}
-            <div className="work__content grid">
-                {data.works.map((work, index) => (
-                    <div className="work__content--item" key={index} onClick={() => navigate(`/details/${index}`)}>
-                        {/* onClick 이벤트로 페이지 이동 처리 */}
-                        <img src={work.img} alt="" className="img" />
-                    </div>
-                ))}
-            </div>
-
-            <div className="work__content grid">
-                {
-                    data.works.map((work, index) => {
-                        return (
-                            <div className="work__content--item" key = {index} onClick = {() => setImageOnModal(work.img)}>
-                                <div className="icon">
-                                </div>
-                            </div>
-                        )
-                    })
-                }
-            </div>
-        </div>
-    )
-}
-
-export default Work;
+        <Grid container spacing={2} className="work__content">
+            {sports.map((sport, index) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={sport.id} className="work__content--item">
+                    <img src={images[`sport${index + 1}`]} alt={sport.name} />
+                    <h3>{sport.name}</h3>
+                </Grid>
+            ))}
+        </Grid>
+    );
+};
+  
+export default Places;

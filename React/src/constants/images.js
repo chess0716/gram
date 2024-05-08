@@ -16,15 +16,30 @@ import icon_star from "../assets/images/icon-star.png";
 import icon_star_white from "../assets/images/icon-star-white.png";
 
 import skills_bg from "../assets/images/skills-bg.jpg";
-import work_1 from "../assets/images/work-1.jpg";
-import work_2 from "../assets/images/work-2.jpg";
-import work_3 from "../assets/images/work-3.jpg";
-import work_4 from "../assets/images/work-4.jpg";
-import work_5 from "../assets/images/work-5.jpg";
-import work_6 from "../assets/images/work-6.jpg";
-import work_7 from "../assets/images/work-7.jpg";
-import work_8 from "../assets/images/work-8.jpg";
-
+import sport1 from "../assets/images/sport1.jpg";
+import sport2 from "../assets/images/sport2.jpg";
+import sport3 from "../assets/images/sport3.jpg";
+import sport4 from "../assets/images/sport4.jpg";
+import sport5 from "../assets/images/sport5.jpg";
+import sport6 from "../assets/images/sport6.jpg";
+import sport7 from "../assets/images/sport7.jpg";
+import sport8 from "../assets/images/sport8.jpg";
+import sport9 from "../assets/images/sport9.jpg";
+import sport10 from "../assets/images/sport10.jpg";
+import sport11 from "../assets/images/sport11.jpg";
+import sport12 from "../assets/images/sport12.jpg";
+import sport13 from "../assets/images/sport13.jpg";
+import sport14 from "../assets/images/sport14.jpg";
+import sport15 from "../assets/images/sport15.jpg";
+import sport16 from "../assets/images/sport16.jpg";
+import sport17 from "../assets/images/sport17.jpg";
+import sport18 from "../assets/images/sport18.jpg";
+import sport19 from "../assets/images/sport19.jpg";
+import sport20 from "../assets/images/sport20.jpg";
+import sport21 from "../assets/images/sport21.jpg";
+import sport22 from "../assets/images/sport22.jpg";
+import sport23 from "../assets/images/sport23.jpg";
+import sport24 from "../assets/images/sport24.jpg";
 export default{
     header_bg,
     logo,
@@ -43,12 +58,28 @@ export default{
     icon_star,
     icon_star_white,
     skills_bg,
-    work_1,
-    work_2,
-    work_3,
-    work_4,
-    work_5,
-    work_6,
-    work_7,
-    work_8
+    sport1,
+    sport2,
+    sport3,
+    sport4,
+    sport5,
+    sport6,
+    sport7,
+    sport8,
+    sport9,
+    sport10,
+    sport11,
+    sport12,
+    sport13,
+    sport14,
+    sport15,
+    sport16,
+    sport17,
+    sport18,
+    sport19,
+    sport20,
+    sport21,
+    sport22,
+    sport23,
+    sport24,
 };

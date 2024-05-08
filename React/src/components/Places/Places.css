@@ -1,6 +1,8 @@
 .work__content--item{
     position: relative;
+    margin-top: 100px;
 }
+
 .work__content--item::after{
     content: "";
     position: absolute;
