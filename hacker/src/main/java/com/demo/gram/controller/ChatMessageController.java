@@ -2,21 +2,21 @@ package com.demo.gram.controller;
 
 import com.demo.gram.model.ChatMessage;
 import com.demo.gram.repository.ChatMessageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/chat/messages")
+@RequiredArgsConstructor
 public class ChatMessageController {
+  private final ChatMessageRepository chatMessageRepository;
 
-  @Autowired
-  private ChatMessageRepository chatMessageRepository;
-
-  @GetMapping("/chat/{roomId}/messages")
-  public List<ChatMessage> getMessagesByRoomId(@PathVariable Long roomId) {
-    return chatMessageRepository.findByChatRoomId(roomId);
+  @GetMapping("/{chatRoomId}")
+  public ResponseEntity<List<ChatMessage>> getMessagesByChatRoomId(@PathVariable Long chatRoomId) {
+    List<ChatMessage> messages = chatMessageRepository.findByChatRoomId(chatRoomId);
+    return ResponseEntity.ok(messages);
   }
 }

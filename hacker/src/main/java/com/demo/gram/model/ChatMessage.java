@@ -18,7 +18,7 @@ public class ChatMessage {
   private ChatRoom chatRoom;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false)
+  @JoinColumn(name = "user_id")
   private User user;
 
   @Column(nullable = false)
@@ -27,5 +27,8 @@ public class ChatMessage {
   @Column(nullable = false)
   private LocalDateTime sentAt;
 
-
+  @PrePersist
+  public void prePersist() {
+    this.sentAt = LocalDateTime.now();  // 저장하기 전에 현재 시간으로 설정
+  }
 }
