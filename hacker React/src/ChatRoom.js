@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
@@ -11,62 +11,71 @@ function ChatRoom() {
     const [chatRoomId, setChatRoomId] = useState(null);
     const [client, setClient] = useState(null);
 
+    const loadChatRoom = useCallback(async () => {
+        try {
+            const roomResponse = await getChatRoomByPostId(postId);
+            const data = roomResponse.data;
+            if (data.chatRoomId) {
+                setChatRoomId(data.chatRoomId);
+                const messagesResponse = await getMessagesByRoomId(data.chatRoomId);
+                const existingMessages = messagesResponse.data;
+                setMessages(existingMessages.map(msg => ({
+                    ...msg,
+                    direction: msg.userId === 'currentUserId' ? 'outgoing' : 'incoming' // Replace 'currentUserId' with actual logic to determine the user
+                })));
+                setupWebSocket(data.chatRoomId);
+            } else {
+                console.error('Chat room not found for the provided post ID');
+            }
+        } catch (error) {
+            console.error('Error fetching chat room:', error);
+        }
+    }, [postId]);
+
     useEffect(() => {
-        getChatRoomByPostId(postId)
-            .then(response => {
-                const data = response.data;
-                if (data.chatRoomId) {
-                    setChatRoomId(data.chatRoomId);
-                    getMessagesByRoomId(data.chatRoomId)
-                        .then(response => {
-                            const existingMessages = response.data;
-                            setMessages(existingMessages.map(msg => ({
-                                ...msg,
-                                direction: 'incoming' // 임시로 모든 메시지를 'incoming'으로 설정
-                            })));
-                        });
-
-                    const socket = new SockJS('http://localhost:8005/ws');
-                    const stompClient = new Client({
-                        webSocketFactory: () => socket,
-                        reconnectDelay: 5000,
-                    });
-
-                    stompClient.onConnect = () => {
-                        stompClient.subscribe(`/topic/chatroom/${data.chatRoomId}`, (message) => {
-                            const receivedMessage = JSON.parse(message.body);
-                            setMessages(prev => [...prev, { ...receivedMessage, direction: "incoming" }]);
-                        });
-                    };
-
-                    stompClient.activate();
-                    setClient(stompClient);
-                } else {
-                    console.error('Chat room not found for the provided post ID');
-                }
-            })
-            .catch(error => console.error('Error fetching chat room:', error));
-
+        loadChatRoom();
         return () => {
             if (client) {
                 client.deactivate();
             }
         };
-    }, [postId]);
+    }, [postId, client, loadChatRoom]);
 
-    const sendMessage = (input) => {
+    const setupWebSocket = (roomId) => {
+        const socket = new SockJS('http://localhost:8005/ws');
+
+        const stompClient = new Client({
+            webSocketFactory: () => socket,
+            reconnectDelay: 5000,
+        });
+
+        stompClient.onConnect = () => {
+            stompClient.subscribe(`/topic/chatroom/${roomId}`, (message) => {
+                const receivedMessage = JSON.parse(message.body);
+                setMessages(prev => [...prev, { ...receivedMessage, direction: "incoming" }]);
+            });
+        };
+
+        stompClient.activate();
+        setClient(stompClient);
+    };
+
+    const sendMessage = async (input) => {
         if (input.trim() && client && client.active && chatRoomId) {
             const messageData = { message: input };
-            sendMessageToRoom(chatRoomId, messageData)
-                .then(() => setMessages(prev => [...prev, { message: input, direction: "outgoing" }]))
-                .catch(error => console.error('Error sending message:', error));
+            try {
+                await sendMessageToRoom(chatRoomId, messageData);
+                setMessages(prev => [...prev, { message: input, direction: "outgoing" }]);
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
         }
     };
 
     return (
-        <div style={{ height: "500px", position: "relative" }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <MainContainer>
-                <ChatContainer>
+                <ChatContainer style={{ border: '1px solid #ccc', borderRadius: '5px', width: '400px' }}>
                     <MessageList>
                         {messages.map((msg, index) => (
                             <Message key={index} model={{ message: msg.message, direction: msg.direction }} />

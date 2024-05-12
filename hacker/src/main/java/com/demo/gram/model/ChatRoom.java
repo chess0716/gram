@@ -1,5 +1,6 @@
 package com.demo.gram.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,7 +17,7 @@ public class ChatRoom {
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "post_id",nullable = false)
+  @JoinColumn(name = "post_id", nullable = false)
   private Post post;
 
   @Column(nullable = false)
@@ -26,7 +27,6 @@ public class ChatRoom {
   private LocalDateTime createdAt;
 
   @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnoreProperties("chatRoom")
   private List<ChatMessage> messages = new ArrayList<>();
-
-
 }

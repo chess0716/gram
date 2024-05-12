@@ -14,7 +14,9 @@ import java.util.List;
 public class ChatMessageController {
   private final ChatMessageRepository chatMessageRepository;
 
-  @GetMapping("/{chatRoomId}")
+
+
+    @GetMapping("/{chatRoomId}")
   public ResponseEntity<List<ChatMessage>> getMessagesByChatRoomId(@PathVariable Long chatRoomId) {
     List<ChatMessage> messages = chatMessageRepository.findByChatRoomId(chatRoomId);
     return ResponseEntity.ok(messages);

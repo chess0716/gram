@@ -1,5 +1,7 @@
 package com.demo.gram.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,6 +17,7 @@ public class ChatMessage {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "chat_room_id", nullable = false)
+  @JsonIgnoreProperties("messages")
   private ChatRoom chatRoom;
 
   @ManyToOne(fetch = FetchType.LAZY)
