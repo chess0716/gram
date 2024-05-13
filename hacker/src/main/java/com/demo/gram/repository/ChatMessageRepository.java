@@ -2,7 +2,7 @@ package com.demo.gram.repository;
 
 
 
-import com.demo.gram.model.ChatMessage;
+import com.demo.gram.entity.ChatMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

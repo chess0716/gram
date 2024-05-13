@@ -1,6 +1,6 @@
 package com.demo.gram.controller;
 
-import com.demo.gram.model.ChatMessage;
+import com.demo.gram.entity.ChatMessage;
 import com.demo.gram.repository.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

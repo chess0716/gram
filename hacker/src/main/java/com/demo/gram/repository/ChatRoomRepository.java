@@ -1,6 +1,6 @@
 package com.demo.gram.repository;
 
-import com.demo.gram.model.ChatRoom;
+import com.demo.gram.entity.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

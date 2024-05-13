@@ -1,4 +1,4 @@
-package com.demo.gram.model;
+package com.demo.gram.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;

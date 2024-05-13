@@ -1,5 +1,6 @@
-package com.demo.gram.model;
+package com.demo.gram.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import java.util.Set;
 
 @Entity(name = "Posts")
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Post{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,7 +19,7 @@ public class Post{
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
-  private User user;
+  private Members user;
 
   @Column(nullable = false)
   private String title;

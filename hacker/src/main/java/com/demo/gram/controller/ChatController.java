@@ -1,25 +1,32 @@
 package com.demo.gram.controller;
 
-import com.demo.gram.model.ChatMessage;
-import com.demo.gram.model.ChatRoom;
-import com.demo.gram.model.ChatRoomResponse;
+import com.demo.gram.dto.MembersDTO;
+import com.demo.gram.entity.ChatMessage;
+import com.demo.gram.entity.ChatRoom;
+import com.demo.gram.entity.ChatRoomResponse;
 import com.demo.gram.repository.ChatMessageRepository;
 import com.demo.gram.repository.ChatRoomRepository;
+import com.demo.gram.service.MembersService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor
+@Log4j2
 public class ChatController {
 
   private final ChatRoomRepository chatRoomRepository;
   private final ChatMessageRepository chatMessageRepository;
+  private final MembersService membersService;
 
   @MessageMapping("/chat/{chatRoomId}/send")
   @SendTo("/topic/chat/{chatRoomId}")
@@ -54,5 +61,12 @@ public class ChatController {
             .orElseThrow(() -> new RuntimeException("No chat room associated with the provided post ID"));
     ChatRoomResponse response = new ChatRoomResponse(chatRoom.getId(), postId);
     return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/chatroom/{chatRoomId}/members")
+  public ResponseEntity<List<MembersDTO>> getChatRoomMembers(@PathVariable Long chatRoomId) {
+    log.info("Getting members for chat room: " + chatRoomId);
+    List<MembersDTO> members = membersService.getChatRoomMembers(chatRoomId);
+    return new ResponseEntity<>(members, HttpStatus.OK);
   }
 }

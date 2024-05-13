@@ -1,5 +1,6 @@
 package com.demo.gram.config;
 
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -16,7 +17,6 @@ public class WebConfig implements WebMvcConfigurer {
     registry.addMapping("/**")  // 모든 경로에 대해
         .allowedOrigins("http://localhost:3000")  // 리액트 서버 URL 허용
         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")  // 허용할 HTTP 메소드
-
         .allowedHeaders("*")  // 모든 헤더 허용
         .allowCredentials(true);
   }
@@ -28,7 +28,4 @@ public class WebConfig implements WebMvcConfigurer {
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     return mapper;
   }
-
-
 }
-

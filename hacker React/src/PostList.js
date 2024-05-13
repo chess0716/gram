@@ -25,6 +25,8 @@ function PostsList() {
                     </li>
                 ))}
             </ul>
+            {/* AuthForm으로 가는 버튼 */}
+            <Link to="/auth/join">AuthForm으로 이동</Link>
         </div>
     );
 }

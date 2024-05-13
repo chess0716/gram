@@ -1,4 +1,4 @@
-package com.demo.gram.model;
+package com.demo.gram.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -7,6 +7,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "chat_rooms")
@@ -20,6 +21,8 @@ public class ChatRoom {
   @JoinColumn(name = "post_id", nullable = false)
   private Post post;
 
+  @ManyToMany(mappedBy = "chatRooms")
+  private Set<Members> members;
   @Column(nullable = false)
   private String name;
 

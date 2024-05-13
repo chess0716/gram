@@ -1,6 +1,6 @@
 package com.demo.gram.service;
 
-import com.demo.gram.model.Post;
+import com.demo.gram.entity.Post;
 
 
 import java.util.List;

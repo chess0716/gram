@@ -1,6 +1,6 @@
 package com.demo.gram.controller;
 
-import com.demo.gram.model.Post;
+import com.demo.gram.entity.Post;
 import com.demo.gram.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

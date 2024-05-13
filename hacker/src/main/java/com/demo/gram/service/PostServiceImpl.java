@@ -1,7 +1,7 @@
 package com.demo.gram.service;
 
 
-import com.demo.gram.model.Post;
+import com.demo.gram.entity.Post;
 import com.demo.gram.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
