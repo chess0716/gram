@@ -27,7 +27,7 @@ public class MembersUserDetailService implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     log.info("MembersUserDetailsService loadUserByUsername: " + username);
-    Optional<Members> result = membersRepository.findByEmail(username, false);
+    Optional<Members> result = membersRepository.findByEmail(username);
 
     // 사용자가 데이터베이스에 없으면 Exception 발생
     if (!result.isPresent()) throw new UsernameNotFoundException("Check Email or Social");

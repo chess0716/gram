@@ -1,83 +1,164 @@
-import React, { useState } from 'react';
-import './AuthForm.css'; // CSS 파일을 import합니다.
-import AuthService from './AuthService'; // AuthService를 import합니다.
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import authService from "./AuthService";
+import "./AuthForm.css";
 
 function AuthForm() {
   const [isRightPanelActive, setIsRightPanelActive] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  const [id, setId] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSignUpSuccess = () => {
+    setIsSignUp(false);
+    setError("");
+    setIsRightPanelActive(false);
+  };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const userData = { name, email, password };
-      await AuthService.register(userData);
-      // 회원가입 후 로그인 패널로 전환
-      setIsRightPanelActive(false);
-    } catch (error) {
-      console.error('Error signing up:', error);
+      await authService.signup({ id, email, password, name, mobile });
+      setError("");
+      setLoading(false);
+      handleSignUpSuccess();
+    } catch (err) {
+      setError("Signup failed");
+      setLoading(false);
     }
   };
 
   const handleSignIn = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const token = await AuthService.login(loginEmail, loginPassword);
-      // 토큰을 저장하거나 다른 작업을 수행할 수 있습니다.
-      console.log('Token:', token);
-    } catch (error) {
-      console.error('Error signing in:', error);
+      await authService.login({ email, password });
+      setError("");
+      setLoading(false);
+      setEmail("");
+      setPassword("");
+      setId("");
+      setName("");
+      setMobile("");
+      navigate("/");
+    } catch (err) {
+      setError("Login failed");
+      setLoading(false);
     }
+  };
+
+  const toggleForm = (isSignUp) => {
+    setIsSignUp(isSignUp);
+    setError("");
+    setIsRightPanelActive(isSignUp);
   };
 
   return (
     <div className="App">
-     
-      <div className={`container ${isRightPanelActive ? "right-panel-active" : ""}`} id="container">
-        <div className="form-container sign-up-container">
-          <form onSubmit={handleSignUp}>
-            <h1>Create Account</h1>
-            <div className="social-container">
-              <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
-              <a href="#" className="social"><i className="fab fa-google-plus-g"></i></a>
-              <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a>
-            </div>
-            <span>or use your email for registration</span>
-            <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            <button type="submit">Sign Up</button>
-          </form>
-        </div>
-        <div className="form-container sign-in-container">
-          <form onSubmit={handleSignIn}>
-            <h1>Sign in</h1>
-            <div className="social-container">
-              <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
-              <a href="#" className="social"><i className="fab fa-google-plus-g"></i></a>
-              <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a>
-            </div>
-            <span>or use your account</span>
-            <input type="email" placeholder="Email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
-            <input type="password" placeholder="Password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
-            <a href="#">Forgot your password?</a>
-            <button type="submit">Sign In</button>
-          </form>
-        </div>
+      <div
+        className={`container ${isRightPanelActive ? "right-panel-active" : ""}`}
+        id="container"
+      >
+        {isSignUp ? (
+          <div className="form-container sign-up-container">
+            <form onSubmit={handleSignUp}>
+              <h1>회원가입</h1>
+              <span>or use your email for registration</span>
+              <input
+                type="text"
+                placeholder="Id"
+                value={id}
+                onChange={(e) => setId(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Mobile"
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value)}
+              />
+              <button type="submit" disabled={loading}>
+                Sign Up
+              </button>
+              {error && <p>{error}</p>}
+            </form>
+          </div>
+        ) : (
+          <div className="form-container sign-in-container">
+            <form onSubmit={handleSignIn}>
+              <h1>로그인</h1>
+              <span>or use your account</span>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <a href="#">Forgot your password?</a>
+              <button type="submit" disabled={loading}>
+                Sign In
+              </button>
+              {error && <p>{error}</p>}
+            </form>
+          </div>
+        )}
         <div className="overlay-container">
           <div className="overlay">
             <div className="overlay-panel overlay-left">
               <h1>Welcome Back!</h1>
-              <p>To keep connected with us please login with your personal info</p>
-              <button className="ghost" id="signIn" onClick={() => setIsRightPanelActive(false)}>Sign In</button>
+              <p>
+                To keep connected with us please login with your personal info
+              </p>
+              <button
+                className="ghost"
+                id="signIn"
+                onClick={() => toggleForm(false)}
+                type="button"
+              >
+                Sign In
+              </button>
             </div>
             <div className="overlay-panel overlay-right">
               <h1>Hello, Friend!</h1>
               <p>Enter your personal details and start journey with us</p>
-              <button className="ghost" id="signUp" onClick={() => setIsRightPanelActive(true)}>Sign Up</button>
+              <button
+                className="ghost"
+                id="signUp"
+                onClick={() => toggleForm(true)}
+                type="button"
+              >
+                Sign Up
+              </button>
             </div>
           </div>
         </div>

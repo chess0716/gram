@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.main-container {
+  width: 80%;
+  height: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid blue; /* 테두리를 파란색으로 설정 */
+}
+
+.custom-sidebar {
+  width: 50px !important; /* 사용자 목록을 매우 작게 줄이기 */
+}
+
+.custom-chat-container {
+  flex-grow: 1; /* 남은 공간을 모두 차지하도록 설정 */
+}

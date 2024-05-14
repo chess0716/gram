@@ -1,8 +1,9 @@
 package com.demo.gram.service;
 
-
 import com.demo.gram.dto.MembersDTO;
+import com.demo.gram.entity.ChatRoom;
 import com.demo.gram.entity.Members;
+import com.demo.gram.repository.ChatRoomRepository;
 import com.demo.gram.repository.MembersRepository;
 import com.demo.gram.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,26 +16,27 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class MembersServiceImpl implements MembersService , UserDetailsService {
+public class MembersServiceImpl implements MembersService, UserDetailsService {
 
   private final MembersRepository membersRepository;
   private final PasswordEncoder passwordEncoder;
+  private final ChatRoomRepository chatRoomRepository;
+  private final JWTUtil jwtUtil;
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-    Members user = membersRepository.findByEmail(email, false)
+    Members user = membersRepository.findByEmail(email)
         .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
     return org.springframework.security.core.userdetails.User.builder()
         .username(user.getEmail())
         .password(user.getPassword())
-        .roles("USER") // 사용자의 권한을 설정합니다.
+        .roles("USER")
         .build();
   }
 
@@ -57,30 +59,19 @@ public class MembersServiceImpl implements MembersService , UserDetailsService {
   @Override
   public MembersDTO get(Long num) {
     Optional<Members> result = membersRepository.findById(num);
-    if (result.isPresent()) {
-      return entityToDTO(result.get());
-    }
-    return null;
+    return result.map(this::entityToDTO).orElse(null);
   }
 
   @Override
   public List<MembersDTO> getAll() {
     List<Members> membersList = membersRepository.getAll();
-    return membersList.stream().map(
-        new Function<Members, MembersDTO>() {
-          @Override
-          public MembersDTO apply(Members members) {
-            return entityToDTO(members);
-          }
-        }
-    ).collect(Collectors.toList());
+    return membersList.stream().map(this::entityToDTO).collect(Collectors.toList());
   }
 
   @Override
   public String login(String email, String password, JWTUtil jwtUtil) {
     log.info("login............");
     String token = "";
-    MembersDTO membersDTO;
     UserDetails userDetails;
     try {
       userDetails = loadUserByUsername(email);
@@ -102,12 +93,34 @@ public class MembersServiceImpl implements MembersService , UserDetailsService {
   }
 
   @Override
-  // MembersService.java
-
   public List<MembersDTO> getChatRoomMembers(Long chatRoomId) {
-    return membersRepository.findByChatRoomId(chatRoomId).stream()
-        .map(member -> new MembersDTO(member.getId(), member.getName()))
-        .collect(Collectors.toList());
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+        .orElseThrow(() -> new RuntimeException("Chat room not found"));
+    return chatRoom.getMembers().stream().map(this::entityToDTO).collect(Collectors.toList());
+  }
 
+  @Override
+  public Members findByEmail(String email) {
+    return membersRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+  }
+
+  public void joinChatRoom(String email, Long chatRoomId) {
+    Members member = membersRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+        .orElseThrow(() -> new RuntimeException("Chat room not found"));
+
+    member.joinChatRoom(chatRoom);
+    membersRepository.save(member);
+  }
+
+  public Members findByToken(String token) {
+    try {
+      String email = jwtUtil.validateAndExtract(token);
+      return findByEmail(email);
+    } catch (Exception e) {
+      throw new RuntimeException("Invalid token", e);
+    }
   }
 }

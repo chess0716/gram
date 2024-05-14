@@ -67,5 +67,6 @@ public interface MembersService {
 
   String login(String email, String password, JWTUtil jwtUtil);
   List<MembersDTO> getChatRoomMembers(Long chatRoomId);
-
+  Members findByEmail(String email);
+  void joinChatRoom(String email, Long chatRoomId);
 }

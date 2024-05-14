@@ -6,6 +6,7 @@ import com.demo.gram.entity.ChatRoom;
 import com.demo.gram.entity.ChatRoomResponse;
 import com.demo.gram.repository.ChatMessageRepository;
 import com.demo.gram.repository.ChatRoomRepository;
+import com.demo.gram.security.util.JWTUtil;
 import com.demo.gram.service.MembersService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,11 +29,13 @@ public class ChatController {
   private final ChatRoomRepository chatRoomRepository;
   private final ChatMessageRepository chatMessageRepository;
   private final MembersService membersService;
+  private final JWTUtil jwtUtil;
 
   @MessageMapping("/chat/{chatRoomId}/send")
   @SendTo("/topic/chat/{chatRoomId}")
   public ChatMessage sendChatMessageViaWebSocket(@DestinationVariable Long chatRoomId, ChatMessage chatMessage) {
-    chatMessage.setChatRoom(chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new RuntimeException("Chat room not found")));
+    chatMessage.setChatRoom(chatRoomRepository.findById(chatRoomId)
+        .orElseThrow(() -> new RuntimeException("Chat room not found")));
     chatMessageRepository.save(chatMessage);
     return chatMessage;
   }
@@ -39,7 +43,7 @@ public class ChatController {
   @PostMapping("/{chatRoomId}/send")
   public ResponseEntity<ChatMessage> sendChatMessageViaPost(@PathVariable Long chatRoomId, @RequestBody ChatMessage chatMessage) {
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-            .orElseThrow(() -> new RuntimeException("ChatRoom not found"));
+        .orElseThrow(() -> new RuntimeException("ChatRoom not found"));
     chatMessage.setChatRoom(chatRoom);
     chatMessageRepository.save(chatMessage);
     return ResponseEntity.ok(chatMessage);
@@ -47,9 +51,9 @@ public class ChatController {
 
   @MessageMapping("/message/{postId}")
   @SendTo("/topic/messages/{postId}")
-  public ChatMessage sendChatMessageForPost(@PathVariable Long postId, ChatMessage chatMessage) {
+  public ChatMessage sendChatMessageForPost(@DestinationVariable Long postId, ChatMessage chatMessage) {
     ChatRoom chatRoom = chatRoomRepository.findByPostId(postId)
-            .orElseThrow(() -> new RuntimeException("No chat room associated with the provided post ID"));
+        .orElseThrow(() -> new RuntimeException("No chat room associated with the provided post ID"));
     chatMessage.setChatRoom(chatRoom);
     chatMessageRepository.save(chatMessage);
     return chatMessage;
@@ -58,15 +62,28 @@ public class ChatController {
   @GetMapping("/room/by-post/{postId}")
   public ResponseEntity<ChatRoomResponse> getChatRoomByPostId(@PathVariable Long postId) {
     ChatRoom chatRoom = chatRoomRepository.findByPostId(postId)
-            .orElseThrow(() -> new RuntimeException("No chat room associated with the provided post ID"));
+        .orElseThrow(() -> new RuntimeException("No chat room associated with the provided post ID"));
     ChatRoomResponse response = new ChatRoomResponse(chatRoom.getId(), postId);
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("/chatroom/{chatRoomId}/members")
+  @GetMapping("/chatroom/{chatRoomId}/user")
   public ResponseEntity<List<MembersDTO>> getChatRoomMembers(@PathVariable Long chatRoomId) {
     log.info("Getting members for chat room: " + chatRoomId);
     List<MembersDTO> members = membersService.getChatRoomMembers(chatRoomId);
     return new ResponseEntity<>(members, HttpStatus.OK);
+  }
+
+  @MessageMapping("/chat/{chatRoomId}/join")
+  @SendTo("/topic/chat/{chatRoomId}/members")
+  public List<MembersDTO> joinChatRoom(@DestinationVariable Long chatRoomId, @Payload String token) {
+    try {
+      String email = jwtUtil.validateAndExtract(token);
+      membersService.joinChatRoom(email, chatRoomId);
+    } catch (Exception e) {
+      log.error("Token validation failed", e);
+      throw new RuntimeException("Invalid token", e);
+    }
+    return membersService.getChatRoomMembers(chatRoomId);
   }
 }
