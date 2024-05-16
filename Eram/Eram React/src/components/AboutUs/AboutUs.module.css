@@ -1,0 +1,36 @@
+.about__content img {
+    margin: 4rem auto 0 auto;
+    width: 260px;
+  }
+  
+  .about__content p.para__text {
+    max-width: 890px;
+    margin: 0 auto;
+  }
+  
+  .container {
+    max-width: 1177px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  
+  .text__center {
+    text-align: center;
+  }
+  
+  .section__title {
+    margin-bottom: 4rem;
+    color: #141414;
+    font-weight: 600;
+    letter-spacing: 1px;
+    font-size: 4rem;
+  }
+  
+  .text__cap {
+    text-transform: capitalize;
+  }
+  
+  .text__grey {
+    color: #8e8e8e;
+  }
+  

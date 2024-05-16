@@ -1,0 +1,67 @@
+.detail-page {
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.detail-page h1 {
+  margin-bottom: 10px;
+}
+
+.detail-page p {
+  margin-bottom: 20px;
+  text-align: center;
+  max-width: 800px;
+}
+
+#map {
+  width: 100%;
+  height: 500px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .detail-page {
+      margin: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-page {
+      margin: 10px;
+  }
+
+  #map {
+      height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-page {
+      margin: 5px;
+  }
+
+  #map {
+      height: 300px;
+  }
+}
+
+.navigate-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.navigate-button:hover {
+  background-color: #0056b3;
+}

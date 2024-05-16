@@ -1,0 +1,85 @@
+.header {
+  min-height: 100vh;
+}
+.header__content {
+  min-height: calc(100vh - 106px);
+  flex-direction: column;
+}
+.header__title {
+  font-size: 4.1rem;
+  line-height: 1.2;
+}
+.para__text {
+  padding: 3.6rem 0;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* .header__content {
+  display: none;  
+} */
+
+/* @media(min-width: 992px){ */
+.header__content {
+  flex-direction: row;   
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+  width: 100%; 
+}
+.header__content--right {
+  text-align: left;
+  width: 50%;
+}
+.header__content--left {
+  width: 50%;
+}
+.header__content--right .para__text {
+  margin-left: 0;
+}
+
+.header__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+}
+  
+.headerbutton { 
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+  
+.leftContent,
+.rightContent {
+  display: flex;
+}
+
+.navbar__brand {
+  margin-top: 5rem;
+  margin-left: 5rem;
+}
+  
+.chat, .login, .register, .logout, .myPage {
+  padding: 10px 20px;
+  margin: 10px;  
+  color: white; 
+  border: none;
+  border-radius: 5px;  
+  cursor: pointer; 
+  font-size: 20px;
+}
+  
+.chat:hover, .login:hover, .register:hover, .logout:hover, .myPage:hover {
+  background-color: #0056b3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); 
+  transform: scale(1.1);
+}
+
+li:hover {
+  transform: scale(1.1);
+  border: 1px;
+  border-radius: 3px;
+  background-color: #3f93ec;
+}
+/* } */
