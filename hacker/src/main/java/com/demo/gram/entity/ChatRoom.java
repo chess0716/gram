@@ -21,8 +21,14 @@ public class ChatRoom {
   @JoinColumn(name = "post_id", nullable = false)
   private Post post;
 
-  @ManyToMany(mappedBy = "chatRooms")
+  @ManyToMany
+  @JoinTable(
+      name = "member_chatrooms",
+      joinColumns = @JoinColumn(name = "chatroom_id"),
+      inverseJoinColumns = @JoinColumn(name = "member_id")
+  )
   private Set<Members> members;
+
   @Column(nullable = false)
   private String name;
 

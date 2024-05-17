@@ -2,6 +2,7 @@ package com.demo.gram.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,10 +30,7 @@ public class Members {
   private String email;
   private String name;
   private String mobile;
-
-  @Column(columnDefinition = "BOOLEAN DEFAULT false")
   private boolean fromSocial;
-
   private LocalDateTime regDate;
   private LocalDateTime modDate;
 
@@ -40,13 +38,7 @@ public class Members {
   @Builder.Default
   private Set<MembersRole> roleSet = new HashSet<>();
 
-  // Members와 ChatRoom 간의 다대다 관계 설정
-  @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  @JoinTable(
-      name = "member_chatrooms",
-      joinColumns = @JoinColumn(name = "member_id"),
-      inverseJoinColumns = @JoinColumn(name = "chatroom_id")
-  )
+  @ManyToMany(mappedBy = "members", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private Set<ChatRoom> chatRooms = new HashSet<>();
 
   public void addMemberRole(MembersRole membersRole) {

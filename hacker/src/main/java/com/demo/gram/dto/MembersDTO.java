@@ -28,8 +28,4 @@ public class MembersDTO {
   private Set<String> roleSet = new HashSet<>();
 
 
-  public MembersDTO(String id, String name) {
-    this.id = id;
-    this.name = name;
-  }
 }

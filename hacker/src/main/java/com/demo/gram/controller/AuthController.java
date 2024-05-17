@@ -18,7 +18,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -32,7 +31,6 @@ public class AuthController {
   private final JWTUtil jwtUtil;
   private final PasswordEncoder passwordEncoder;
 
-  // 회원가입
   @PostMapping(value = "/join")
   public ResponseEntity<Long> register(@RequestBody MembersDTO membersDTO) {
     log.info("register..." + membersDTO);
@@ -41,9 +39,8 @@ public class AuthController {
     return new ResponseEntity<>(num, HttpStatus.OK);
   }
 
-  // 로그인
-  @PostMapping("/login")
-  public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> loginRequest) {
+  @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<Map<String, String>> getToken(@RequestBody Map<String, String> loginRequest) {
     String email = loginRequest.get("email");
     String password = loginRequest.get("password");
 
@@ -53,13 +50,15 @@ public class AuthController {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("error", errorMessage));
     }
 
+    log.info("Login attempt with email: " + email);
+
     try {
-      // 사용자 인증
       String token = membersService.login(email, password, jwtUtil);
 
       if (token != null && !token.isEmpty()) {
         log.info("Login successful. Generating token...");
-        return ResponseEntity.ok(Collections.singletonMap("token", token));
+        Map<String, String> response = Collections.singletonMap("token", token);
+        return ResponseEntity.ok(response);
       } else {
         String errorMessage = "Login failed. Invalid email or password.";
         log.error(errorMessage);
@@ -72,13 +71,9 @@ public class AuthController {
     }
   }
 
-  // 로그아웃
   @PostMapping("/logout")
   public ResponseEntity<ResponseDTO> logout(HttpServletRequest request, HttpServletResponse response) {
     try {
-      log.info(request);
-      log.info(response);
-      log.info(SecurityContextHolder.getContext().getAuthentication());
       new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
       return new ResponseEntity<>(new ResponseDTO("success", true), HttpStatus.OK);
     } catch (Exception e) {

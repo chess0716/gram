@@ -2,36 +2,51 @@ package com.demo.gram.security.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
+import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
+import static io.jsonwebtoken.Jwts.*;
+
 @Log4j2
+@Component
 public class JWTUtil {
 
-  private String secretKey = "1234567890abcdefghijklmnopqrstuvwxyz";
-  private long expire = 60 * 24 * 30;
+  @Value("${jwt.secret}")
+  private String secret;
 
-  // JWT를 생성
-  public String generateToken(String content) throws Exception {
-    return Jwts.builder()
-        .issuedAt(new Date()) // 발급 시간
-        .expiration(Date.from(ZonedDateTime.now().plusMinutes(expire).toInstant())) //  만료 시간
+  private Key secretKey;
+
+  private final long expire = 60 * 24 * 30 * 1000; // 30 days in milliseconds
+
+  @PostConstruct
+  public void init() {
+    byte[] decodedKey = Base64.getDecoder().decode(secret);
+    this.secretKey = Keys.hmacShaKeyFor(decodedKey); // Use the provided key
+  }
+
+  public String generateToken(String content) {
+    return builder()
+        .setIssuedAt(new Date())
+        .setExpiration(new Date(System.currentTimeMillis() + expire))
         .claim("sub", content)
-        .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
+        .signWith(secretKey, SignatureAlgorithm.HS512)
         .compact();
   }
 
-  // 주어진 JWT의 유효성을 검증하고, 유효한 경우에는 내부에 포함된 클레임을 추출하여 반환
-  public String validateAndExtract(String tokenStr) throws Exception {
-    log.info("Jwts getClass: " +
-        Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
-            .build().parse(tokenStr));
-    Claims claims = (Claims) Jwts.parser().verifyWith(
-        Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8))).build().parse(tokenStr).getPayload();
-    return (String) claims.get("sub");
+  public String validateAndExtract(String tokenStr) {
+    Claims claims = Jwts.parserBuilder()
+        .setSigningKey(secretKey)
+        .build()
+        .parseClaimsJws(tokenStr)
+        .getBody();
+    return claims.get("sub", String.class);
   }
 }

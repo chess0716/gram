@@ -33,57 +33,100 @@ public class ChatController {
 
   @MessageMapping("/chat/{chatRoomId}/send")
   @SendTo("/topic/chat/{chatRoomId}")
-  public ChatMessage sendChatMessageViaWebSocket(@DestinationVariable Long chatRoomId, ChatMessage chatMessage) {
-    chatMessage.setChatRoom(chatRoomRepository.findById(chatRoomId)
-        .orElseThrow(() -> new RuntimeException("Chat room not found")));
+  public ChatMessage sendChatMessageViaWebSocket(@DestinationVariable Long chatRoomId, @Payload ChatMessage chatMessage) {
+    log.info("WebSocket Message received for chatRoomId: {}", chatRoomId);
+    log.info("Message content: {}", chatMessage.getMessage());
+
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+        .orElseThrow(() -> {
+          log.error("Chat room not found for chatRoomId: {}", chatRoomId);
+          return new RuntimeException("Chat room not found");
+        });
+
+    chatMessage.setChatRoom(chatRoom);
     chatMessageRepository.save(chatMessage);
+
+    log.info("Message saved and broadcasted: {}", chatMessage.getMessage());
     return chatMessage;
   }
 
   @PostMapping("/{chatRoomId}/send")
   public ResponseEntity<ChatMessage> sendChatMessageViaPost(@PathVariable Long chatRoomId, @RequestBody ChatMessage chatMessage) {
+    log.info("HTTP Message received for chatRoomId: {}", chatRoomId);
+    log.info("Message content: {}", chatMessage.getMessage());
+
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-        .orElseThrow(() -> new RuntimeException("ChatRoom not found"));
+        .orElseThrow(() -> {
+          log.error("Chat room not found for chatRoomId: {}", chatRoomId);
+          return new RuntimeException("ChatRoom not found");
+        });
+
     chatMessage.setChatRoom(chatRoom);
     chatMessageRepository.save(chatMessage);
+
+    log.info("Message saved via HTTP: {}", chatMessage.getMessage());
     return ResponseEntity.ok(chatMessage);
   }
 
   @MessageMapping("/message/{postId}")
   @SendTo("/topic/messages/{postId}")
-  public ChatMessage sendChatMessageForPost(@DestinationVariable Long postId, ChatMessage chatMessage) {
+  public ChatMessage sendChatMessageForPost(@DestinationVariable Long postId, @Payload ChatMessage chatMessage) {
+    log.info("WebSocket Message received for postId: {}", postId);
+    log.info("Message content: {}", chatMessage.getMessage());
+
     ChatRoom chatRoom = chatRoomRepository.findByPostId(postId)
-        .orElseThrow(() -> new RuntimeException("No chat room associated with the provided post ID"));
+        .orElseThrow(() -> {
+          log.error("No chat room associated with the provided post ID: {}", postId);
+          return new RuntimeException("No chat room associated with the provided post ID");
+        });
+
     chatMessage.setChatRoom(chatRoom);
     chatMessageRepository.save(chatMessage);
+
+    log.info("Message saved and broadcasted for postId: {}", chatMessage.getMessage());
     return chatMessage;
   }
 
   @GetMapping("/room/by-post/{postId}")
   public ResponseEntity<ChatRoomResponse> getChatRoomByPostId(@PathVariable Long postId) {
+    log.info("Fetching chat room for postId: {}", postId);
+
     ChatRoom chatRoom = chatRoomRepository.findByPostId(postId)
-        .orElseThrow(() -> new RuntimeException("No chat room associated with the provided post ID"));
+        .orElseThrow(() -> {
+          log.error("No chat room associated with the provided post ID: {}", postId);
+          return new RuntimeException("No chat room associated with the provided post ID");
+        });
+
     ChatRoomResponse response = new ChatRoomResponse(chatRoom.getId(), postId);
+    log.info("Chat room found for postId: {}", postId);
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("/chatroom/{chatRoomId}/user")
+  @GetMapping("/chatroom/{chatRoomId}/members")
   public ResponseEntity<List<MembersDTO>> getChatRoomMembers(@PathVariable Long chatRoomId) {
-    log.info("Getting members for chat room: " + chatRoomId);
+    log.info("Getting members for chat room: {}", chatRoomId);
+
     List<MembersDTO> members = membersService.getChatRoomMembers(chatRoomId);
+    log.info("Members found: {}", members.size());
     return new ResponseEntity<>(members, HttpStatus.OK);
   }
 
   @MessageMapping("/chat/{chatRoomId}/join")
   @SendTo("/topic/chat/{chatRoomId}/members")
   public List<MembersDTO> joinChatRoom(@DestinationVariable Long chatRoomId, @Payload String token) {
+    log.info("Join request received for chatRoomId: {}", chatRoomId);
     try {
       String email = jwtUtil.validateAndExtract(token);
+      log.info("Token validated for email: {}", email);
+
       membersService.joinChatRoom(email, chatRoomId);
     } catch (Exception e) {
       log.error("Token validation failed", e);
       throw new RuntimeException("Invalid token", e);
     }
-    return membersService.getChatRoomMembers(chatRoomId);
+
+    List<MembersDTO> members = membersService.getChatRoomMembers(chatRoomId);
+    log.info("Members list sent for chatRoomId: {}", chatRoomId);
+    return members;
   }
 }
