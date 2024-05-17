@@ -7,6 +7,7 @@ import DetailPage from "./components/Event/DetailPage"; // 상세 페이지 컴�
 import PostList from "./components/Posts/PostList"; // PostList 컴포넌트
 import PostDetail from "./components/Posts/PostDetail"; // PostDetail 컴포넌트
 import ChatRoom from "./components/ChatRoom/ChatRoom"; // ChatRoom 컴포넌트
+import AuthForm from "./components/AuthForm/AuthForm"; // AuthForm 컴포넌트
 
 import styles from './App.css'; // CSS 모듈 import
 
@@ -19,7 +20,6 @@ const App = () => {
       <Routes>
         <Route path="/" element={
           <>
-           
             <Places />
             <AboutUs />
           </>
@@ -28,7 +28,8 @@ const App = () => {
         <Route path="/posts" element={<PostList />} />
         <Route path="/posts/:id" element={<PostDetail />} />
         <Route path="/chat/:postId" element={<ChatRoom />} />
-       
+        <Route path="/auth/join" element={<AuthForm />} />
+        <Route path="/auth/login" element={<AuthForm />} />
       </Routes>
     </div>
   );

@@ -11,48 +11,94 @@ const axiosInstance = axios.create({
 });
 
 const AuthService = {
-  // 로그인 함수
   login: async (data) => {
     try {
       const response = await axiosInstance.post("/auth/login", data);
-
       if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify({
-          id: response.data.user.id,
-          email: response.data.user.email,
-          name: response.data.user.name,
-        }));
+        localStorage.setItem("accessToken", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        console.log("Token received:", response.data.token);
+      } else {
+        console.error("No access token received");
       }
-
       return response.data;
     } catch (error) {
-      console.error("Login failed:", error);
       throw new Error("Login failed");
     }
   },
 
-  // 가입 함수
   signup: async (data) => {
     try {
       const response = await axiosInstance.post("/auth/join", data);
       return response.data;
     } catch (error) {
-      console.error("Signup failed:", error);
       throw new Error("Signup failed");
     }
   },
 
-  // 회원 정보 수정 함수
-  updateProfile: async (data) => {
+  fetchUserData: async () => {
     try {
-      const response = await axiosInstance.put("/members/update", data);
+      const accessToken = localStorage.getItem("accessToken");
+      const response = await axiosInstance.get("/members/me", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       return response.data;
     } catch (error) {
-      console.error("Profile update failed:", error);
+      throw new Error("Failed to fetch user data");
+    }
+  },
+
+  updateProfile: async (data) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      const response = await axiosInstance.put("/members/update", data, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
       throw new Error("Profile update failed");
     }
-  }
+  },
+
+  logout: async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      await axiosInstance.post(
+        "/auth/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+    } catch (error) {
+      console.error("Failed to logout:", error);
+      throw error;
+    }
+  },
+
+  deleteAccount: async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      await axiosInstance.delete("/members/me", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+    } catch (error) {
+      console.error("Failed to delete account:", error);
+      throw error;
+    }
+  },
 };
 
 export default AuthService;
