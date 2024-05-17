@@ -13,8 +13,6 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 
-import static io.jsonwebtoken.Jwts.*;
-
 @Log4j2
 @Component
 public class JWTUtil {
@@ -33,7 +31,7 @@ public class JWTUtil {
   }
 
   public String generateToken(String content) {
-    return builder()
+    return Jwts.builder()
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + expire))
         .claim("sub", content)
@@ -42,7 +40,7 @@ public class JWTUtil {
   }
 
   public String validateAndExtract(String tokenStr) {
-    Claims claims = Jwts.parserBuilder()
+    Claims claims = Jwts.parser()
         .setSigningKey(secretKey)
         .build()
         .parseClaimsJws(tokenStr)

@@ -1,5 +1,6 @@
 package com.demo.gram.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,14 +14,15 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "chatRooms")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "chatRooms"})
 public class Members {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long mno;
 
-  @Column(unique = true) // 중복 방지
+  @Column(unique = true)
   private String id;
 
   @Column(nullable = false)
@@ -47,6 +49,6 @@ public class Members {
 
   public void joinChatRoom(ChatRoom chatRoom) {
     this.chatRooms.add(chatRoom);
-    chatRoom.getMembers().add(this); // ChatRoom 엔티티에도 반대 방향의 관계 설정
+    chatRoom.getMembers().add(this);
   }
 }

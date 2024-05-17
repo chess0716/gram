@@ -57,37 +57,29 @@ public interface MembersService {
           .build();
       return membersDTO;
     }
-
+  List<MyPostDTO> getUserPostsFromToken(String token) throws Exception;
     // 회원가입
     Long registMembersDTO(MembersDTO membersDTO);
 
-    // 회원수정
-    void updateMembersDTO(MembersDTO membersDTO);
+  void updateMembersDTO(MembersDTO membersDTO);
 
-    // 회원탈퇴
-    void removeMembers(Long mno);
+  void removeMembers(Long mno);
 
-    // 특정회원추출
-    MembersDTO get(Long mno);
+  MembersDTO get(Long mno);
 
-    // 전체회원추출
-    List<MembersDTO> getAll();
+  List<MembersDTO> getAll();
 
-    // 로그인 후 토큰 발행
-    String login(String email, String password, JWTUtil jwtUtil);
+  String login(String email, String password, JWTUtil jwtUtil);
 
-    // 로그인 후 회원정보 추출
-    Members getCurrentLoggedInUser(String token) throws Exception;
+  Members getCurrentLoggedInUser(String token) throws Exception;
 
-    // 내가 쓴 게시글 추출
-    List<MyPostDTO> getUserPostsFromToken(String token) throws Exception;
+  List<ChatRoomDTO> getUserChatRoomsFromToken(String token) throws Exception;
 
-    // 내가 참여한 채팅방 추출
-    List<ChatRoomDTO> getUserChatRoomsFromToken(String token) throws Exception;
+  Long getUserIdFromToken(String token) throws Exception;
 
-    // 토큰에서 사용자 ID를 추출
-    Long getUserIdFromToken(String token) throws Exception;
   List<MembersDTO> getChatRoomMembers(Long chatRoomId);
+
   Members findByEmail(String email);
+
   void joinChatRoom(String email, Long chatRoomId);
 }

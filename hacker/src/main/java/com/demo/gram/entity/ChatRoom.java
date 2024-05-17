@@ -12,6 +12,7 @@ import java.util.Set;
 @Entity
 @Table(name = "chat_rooms")
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "post"})
 public class ChatRoom {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -12,11 +12,11 @@ import com.demo.gram.repository.MyPostRepository;
 import com.demo.gram.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +33,11 @@ public class MembersServiceImpl implements MembersService {
   private final PasswordEncoder passwordEncoder;
   private final JWTUtil jwtUtil;
   private final ModelMapper modelMapper;
+
+  @Override
+  public List<MyPostDTO> getUserPostsFromToken(String token) throws Exception {
+    return null;
+  }
 
   @Override
   public Long registMembersDTO(MembersDTO membersDTO) {
@@ -97,11 +102,7 @@ public class MembersServiceImpl implements MembersService {
         .orElseThrow(() -> new Exception("Logged in user not found"));
   }
 
-  @Override
-  public List<MyPostDTO> getUserPostsFromToken(String token) throws Exception {
-    Long mno = getMnoFromToken(token);
-    return getUserPosts(mno);
-  }
+
 
   @Override
   public List<ChatRoomDTO> getUserChatRoomsFromToken(String token) throws Exception {
@@ -126,12 +127,13 @@ public class MembersServiceImpl implements MembersService {
         .collect(Collectors.toList());
   }
 
+
   @Override
   public Members findByEmail(String email) {
     return membersRepository.findByEmail(email, false)
         .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
   }
-
+  @Transactional
   @Override
   public void joinChatRoom(String email, Long chatRoomId) {
     Members member = findByEmail(email);

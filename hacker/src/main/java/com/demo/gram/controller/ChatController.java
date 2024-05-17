@@ -1,5 +1,6 @@
 package com.demo.gram.controller;
 
+import com.demo.gram.dto.ChatMessageDTO;
 import com.demo.gram.dto.MembersDTO;
 import com.demo.gram.entity.ChatMessage;
 import com.demo.gram.entity.ChatRoom;
@@ -16,9 +17,11 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/chat")
@@ -33,7 +36,7 @@ public class ChatController {
 
   @MessageMapping("/chat/{chatRoomId}/send")
   @SendTo("/topic/chat/{chatRoomId}")
-  public ChatMessage sendChatMessageViaWebSocket(@DestinationVariable Long chatRoomId, @Payload ChatMessage chatMessage) {
+  public ChatMessageDTO sendChatMessageViaWebSocket(@DestinationVariable Long chatRoomId, @Payload ChatMessage chatMessage) {
     log.info("WebSocket Message received for chatRoomId: {}", chatRoomId);
     log.info("Message content: {}", chatMessage.getMessage());
 
@@ -47,11 +50,12 @@ public class ChatController {
     chatMessageRepository.save(chatMessage);
 
     log.info("Message saved and broadcasted: {}", chatMessage.getMessage());
-    return chatMessage;
+
+    return new ChatMessageDTO(chatMessage.getId(), chatMessage.getMessage(), chatMessage.getTimestamp(), chatRoom.getId(), chatMessage.getSenderName());
   }
 
   @PostMapping("/{chatRoomId}/send")
-  public ResponseEntity<ChatMessage> sendChatMessageViaPost(@PathVariable Long chatRoomId, @RequestBody ChatMessage chatMessage) {
+  public ResponseEntity<ChatMessageDTO> sendChatMessageViaPost(@PathVariable Long chatRoomId, @RequestBody ChatMessage chatMessage) {
     log.info("HTTP Message received for chatRoomId: {}", chatRoomId);
     log.info("Message content: {}", chatMessage.getMessage());
 
@@ -65,26 +69,8 @@ public class ChatController {
     chatMessageRepository.save(chatMessage);
 
     log.info("Message saved via HTTP: {}", chatMessage.getMessage());
-    return ResponseEntity.ok(chatMessage);
-  }
 
-  @MessageMapping("/message/{postId}")
-  @SendTo("/topic/messages/{postId}")
-  public ChatMessage sendChatMessageForPost(@DestinationVariable Long postId, @Payload ChatMessage chatMessage) {
-    log.info("WebSocket Message received for postId: {}", postId);
-    log.info("Message content: {}", chatMessage.getMessage());
-
-    ChatRoom chatRoom = chatRoomRepository.findByPostId(postId)
-        .orElseThrow(() -> {
-          log.error("No chat room associated with the provided post ID: {}", postId);
-          return new RuntimeException("No chat room associated with the provided post ID");
-        });
-
-    chatMessage.setChatRoom(chatRoom);
-    chatMessageRepository.save(chatMessage);
-
-    log.info("Message saved and broadcasted for postId: {}", chatMessage.getMessage());
-    return chatMessage;
+    return ResponseEntity.ok(new ChatMessageDTO(chatMessage.getId(), chatMessage.getMessage(), chatMessage.getTimestamp(), chatRoom.getId(), chatMessage.getSenderName()));
   }
 
   @GetMapping("/room/by-post/{postId}")
@@ -111,6 +97,7 @@ public class ChatController {
     return new ResponseEntity<>(members, HttpStatus.OK);
   }
 
+  @Transactional
   @MessageMapping("/chat/{chatRoomId}/join")
   @SendTo("/topic/chat/{chatRoomId}/members")
   public List<MembersDTO> joinChatRoom(@DestinationVariable Long chatRoomId, @Payload String token) {

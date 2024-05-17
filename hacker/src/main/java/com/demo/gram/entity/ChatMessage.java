@@ -2,13 +2,14 @@ package com.demo.gram.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "chat_messages")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ChatMessage {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,18 +20,14 @@ public class ChatMessage {
   @JsonIgnoreProperties("messages")
   private ChatRoom chatRoom;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  private Members user;
-
   @Column(nullable = false)
   private String message;
 
-  @Column(nullable = false)
-  private LocalDateTime sentAt;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "sender_id", nullable = false)
+  @JsonIgnoreProperties("messages")
+  private Members sender;
 
-  @PrePersist
-  public void prePersist() {
-    this.sentAt = LocalDateTime.now();  // 저장하기 전에 현재 시간으로 설정
-  }
+  @Column(nullable = false)
+  private LocalDateTime timestamp;
 }
